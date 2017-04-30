@@ -207,6 +207,12 @@ public class RouterResponse {
             Log.warning("RouterResponse send(str:) invoked after end() for \(self.request.urlURL)")
             return self
         }
+        
+        let contentType = headers["Content-Type"]
+        if contentType == nil  {
+            headers.setType("html", charset: "utf-8")
+        }
+        
         let utf8Length = str.lengthOfBytes(using: .utf8)
         let bufferLength = utf8Length + 1  // Add room for the NULL terminator
         var utf8: [CChar] = [CChar](repeating: 0, count: bufferLength)
@@ -271,7 +277,7 @@ public class RouterResponse {
         }
         do {
             let jsonData = try json.rawData(options:.prettyPrinted)
-            headers.setType("json")
+            headers.setType("json", charset: "utf-8")
             send(data: jsonData)
         } catch {
             Log.warning("Failed to convert JSON for sending: \(error.localizedDescription)")
@@ -298,7 +304,7 @@ public class RouterResponse {
         }
         do {
             let jsonData = try JSONSerializationType.data(withJSONObject: json, options:.prettyPrinted)
-            headers.setType("json")
+            headers.setType("json", charset: "utf-8")
             send(data: jsonData)
         } catch {
             Log.warning("Failed to convert JSON for sending: \(error.localizedDescription)")
@@ -319,7 +325,7 @@ public class RouterResponse {
         }
         do {
             let jsonData = try JSONSerializationType.data(withJSONObject: json, options:.prettyPrinted)
-            headers.setType("json")
+            headers.setType("json", charset: "utf-8")
             send(data: jsonData)
         } catch {
             Log.warning("Failed to convert JSON for sending: \(error.localizedDescription)")
@@ -365,7 +371,7 @@ public class RouterResponse {
         let jsonStr = jsonp.description
         let taintedJSCallbackName = request.queryParameters[callbackParameter]
         if let jsCallbackName = validJsonpCallbackName(taintedJSCallbackName) {
-            headers.setType("js")
+            headers.setType("js", charset: "utf-8")
             // Set header "X-Content-Type-Options: nosniff" and prefix body with
             // "/**/ " as security mitigation for Flash vulnerability
             // CVE-2014-4671, CVE-2014-5333 "Abusing JSONP with Rosetta Flash"
